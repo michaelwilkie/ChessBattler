@@ -180,6 +180,11 @@ class Chess
     /////////////////////////////////////////
     stateBlackKingInCheck()
     {
+        if (this.isCheckMated())
+        {
+            this.stateBlackCheckMate__Entry();
+        }
+
         if (this.oPlayer_Black.hasMoved())
         {
             switch(this.whichKingInCheck())
@@ -227,6 +232,38 @@ class Chess
 
     } // End of stateWhiteKingInCheck()
 
+    //////////////////////////////////////////////////////
+    // Chess.isCheckMated                               //
+    // Function:                                        //
+    //      Determines whether a check mate happened    //
+    //      A player is check mated when:               //
+    //          1) The king cannot move to a safe place //
+    //          2) The aggressor cannot be captured     //
+    //          3) The aggressor cannot be blocked      //
+    // Parameters:                                      //
+    //      None                                        //
+    // Return value:                                    //
+    //      true    = A player was check mated          //
+    //      false   = A player was NOT check mated      //
+    //////////////////////////////////////////////////////
+    isCheckMated()
+    {
+        var bReturn = false;
+
+        // Null checking
+        if (null == game_chessboard_instance                        ) { throw "Error: Chessboard instance is null"                                  ; }
+        if (null == game_chessboard_instance.oKing_in_check         ) { throw "Error: Checking for checkmate yet there is no king in check"         ; }
+        if (null == game_chessboard_instance.oPiece_checking_king   ) { throw "Error: King is in check but there is no piece putting him in check"  ; }
+
+        // Determine if the King in check cannot move to a safe place
+        if (0 == game_chessboard_instance.oKing_in_check.getSafeMoves().length)
+        {
+            // Determine if the aggressor cannot be captured
+        }
+
+        return bReturn;
+    }
+
     stateWhiteTurn__Entry()
     {
         this.iState = GAME_CHESS__STATE__TURN_WHITE;
@@ -261,6 +298,20 @@ class Chess
         this.resetPlayerMoveStates();
 
         console.log("Transitioning to the White In Check State");
+    }
+
+    stateWhiteCheckMate__Entry()
+    {
+        this.iState = GAME_CHESS__STATE__CHECK_MATE_WHITE;
+
+        console.log("Transitioning to the White Check Mate State");
+    }
+
+    stateBlackCheckMate__Entry()
+    {
+        this.iState = GAME_CHESS__STATE__CHECK_MATE_BLACK;
+
+        console.log("Transitioning to the Black Check Mate State");
     }
 
     resetPlayerMoveStates()

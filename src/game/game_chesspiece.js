@@ -336,6 +336,10 @@ class ChessPiece
                 // Set the return value as the king that is now in check
                 oReturn = oChessPiece;
 
+                // Setting the checked board pieces here for convenience
+                game_chessboard_instance.oKing_in_check         = oChessPiece;
+                game_chessboard_instance.oPiece_checking_king   = this;
+
                 // King in check found, break out of the function
                 break;
             } // End of if (this.getColor() == oChessPiece.getColor())
@@ -702,6 +706,75 @@ class ChessPiece
         this.addSpaceIfValid_Single(valid_moves_list,  1, -1); // Left Down
 
     } // End of getValidMoves_King(valid_moves_list)
+
+    //////////////////////////////////////////////////////////////
+    // ChessPiece.getSafeMoves                                  //
+    // Function:                                                //
+    //      Returns a list of all safe moves a piece can make   //
+    //      without the chance of being taken the next turn     //
+    // Parameters:                                              //
+    //      None                                                //
+    // Return value:                                            //
+    //      Array<{x,y}>                                        //
+    //////////////////////////////////////////////////////////////
+    getSafeMoves()
+    {
+        var safe_moves_list = []    ; // [Array<{x,y}>  ] Array of safe moves the
+        var bSafe_move_flag = true  ; // [Boolean       ] Flag that signals if the current move is not safe
+
+        // Null checking
+        if (null == game_chessboard_instance) { throw "Error: Chessboard instance is null"                  ; }
+        if (null == this.valid_moves_list   ) { throw "Error: Valid moves list is null, rather than empty"  ; }
+        
+        var enemy_pieces_list = null;
+        
+        // Determine what team this piece is on then get the pieces of the enemy team
+        if (this.getColor() == GAME_CHESSPIECE__COLOR__BLACK) { enemy_pieces_list = game_chessboard_instance.getWhitePieces(); }
+        else                                                  { enemy_pieces_list = game_chessboard_instance.getBlackPieces(); }
+
+        for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+        {
+            var oMovePosition = this.valid_moves_list[iMoveIndex];
+
+            for (var iEnemyPieceIndex = 0; iEnemyPieceIndex < enemy_pieces_list.length; iEnemyPieceIndex++)
+            {
+                var oEnemyPiece = enemy_pieces_list[iEnemyPieceIndex];
+
+                for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemyPiece.valid_moves_list.length; iEnemyMoveIndex++)
+                {
+                    var oEnemyMovePosition = oEnemyPiece.valid_moves_list[iEnemyMoveIndex];
+
+                    // Determine if the current piece and the enemy want to move to the same location
+                    if (game_vectorsEqual2D(oMovePosition, oEnemyMovePosition))
+                    {
+                        // This move is not safe, set the safe move flag to false
+                        bSafe_move_flag = false;
+
+                        // No need to consider any other enemy's moves for this piece's position since we already know it's not safe
+                        break;
+                    } // End of if (game_vectorsEqual2D(oMovePosition, oEnemyMovePosition))
+
+                } // End of for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemyPiece.valid_moves_list.length; iEnemyMoveIndex++)
+
+                // Determine if we've found that this current location in our valid move list is not safe
+                if (!bSafe_move_flag)
+                {
+                    break;
+                }
+
+            } // End of for (var iEnemyPieceIndex = 0; iEnemyPieceIndex < enemy_pieces_list.length; iEnemyPieceIndex++)
+
+            // If we've made it this far, and the safe move flag is true, then it must be a safe position
+            if (bSafe_move_flag)
+            {
+                safe_moves_list.push(this.valid_moves_list[iMoveIndex]);
+            }
+
+        } // End of for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+
+        return safe_moves_list;
+
+    } // End of ChessPiece.getSafeMoves()
 
     /////////////////////////////////////////////////////////////
     //     ChessPiece.addSpaceIfValid_Single(valid_moves_list) //
