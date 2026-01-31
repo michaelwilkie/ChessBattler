@@ -1,0 +1,113 @@
+/*******************************************************
+    style.css
+    Should be the only CSS file in the project
+    unless I find a good reason to split it up
+*******************************************************/
+
+canvas {
+    border: 2px solid black;
+    display: table-row;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: Verdana; /* Seems most like "Verdun" as in the Battle of Verdun, since this IS a chess battler */
+    /*color: white;*/
+    text-align: center;
+}
+
+input, label {
+    font-family: Verdana;
+}
+
+/* Source: https://www.w3schools.com/css/tryit.asp?filename=trycss_buttons_round */
+#button_start_game {
+  /*background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;*/
+}
+
+/* Source: https://www.w3schools.com/css/tryit.asp?filename=trycss_buttons_round */
+/*
+.button_round {border-radius: 12px;}
+.full_width {width: 100%;}
+*/
+
+#ui_canvas      { z-index: 2        ; }
+#game_canvas    { z-index: 1        ; }
+
+.wrapper 
+{
+    float: left;
+    position: relative;
+    width   : 500px   ;
+    height  : 500px   ;
+}
+.wrapper canvas 
+{
+    position: absolute;
+    top     : 0       ;
+    left    : 0       ;
+}
+
+.chess_settings_area
+{
+    position: absolute;
+    top: 20px;
+    left: 720px;
+    border-radius: 25px;
+    /*background: #0e3f0d;*/
+    padding: 20px;
+    /*width: 200px;*/
+    width: 45%;
+}
+
+/* Source: */
+[draggable="true"] 
+{
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+ul.moveable
+{
+  list-style: none;
+  margin: 0px;
+}
+
+li 
+{
+    /*font-family: Arial;*/
+    list-style-image: none;
+    margin: 10px;
+    border: 1px solid #ccc;
+    padding: 4px;
+    border-radius: 4px;
+    color: #666;
+    cursor: move;
+}
+
+li:hover
+{
+    background-color: #eee;
+}
+
+/* Chess Computer Rule HTML Elements */
+.chess_cpu_rule
+{
+    /*font-family: Arial;*/
+}

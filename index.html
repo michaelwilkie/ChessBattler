@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Chess Battler</title>
+
+        <!-- Style sheets -->
+        <link href="css/style.css" rel="stylesheet" type="text/css" />
+        <!--<link href="css/w3.css" rel="stylesheet" type="text/css" /> -->
+        <!--<link href="css/XP.css" rel="stylesheet" type="text/css" /> -->
+
+        <script src="src/library/createjs.min.js" rel="stylesheet"></script> <!-- Sound library -->
+        <script src="src/library/jquery.min.js"   rel="stylesheet"></script> <!-- JQuery library -->
+
+        <link rel="icon" href="images/chess_pawn_ready_for_battle_icon.png">
+    </head>
+
+    <body>
+        <script src="src/game/game_chess.js"        ></script>
+        <script src="src/game/game_chessboard.js"   ></script>
+        <script src="src/game/game_chesspiece.js"   ></script>
+        <script src="src/game/game_cpu.js"          ></script>
+        <script src="src/game/game_cpu_rule.js"     ></script>
+        <script src="src/game/game_player.js"       ></script>
+        <script src="src/game/game_globals.js"      ></script>
+        <script src="src/game/game_func.js"         ></script>
+        <script src="src/game/game_key.js"          ></script>
+        <script src="src/game/game_keyhandler.js"   ></script>
+        <script src="src/game/game_tables.js"       ></script>
+        <script src="src/game/game_time.js"         ></script>
+
+        <script src="src/ui/ui_component.js"        ></script>
+        <script src="src/ui/ui_button.js"           ></script>
+        <script src="src/ui/ui_func.js"             ></script>
+        <script src="src/ui/ui_globals.js"          ></script>
+        <script src="src/ui/ui_label.js"            ></script>
+        <script src="src/ui/ui_mouse_events.js"     ></script>
+        <script src="src/ui/ui_scroll_component.js" ></script>
+
+        <script src="src/html/html_cpu_rules.js"    ></script>
+        <script src="src/html/html_func.js"         ></script>
+        <script src="src/html/html_globals.js"      ></script>
+
+        <script src="src/image/image_data.js"       ></script>
+        <script src="src/image/image_func.js"       ></script>
+        <script src="src/image/image_globals.js"    ></script>
+
+        <script src="src/sound/sound_data.js"       ></script>
+        <script src="src/sound/sound_func.js"       ></script>
+        <script src="src/sound/sound_globals.js"    ></script>
+
+        <script src="src/initialize.js"             ></script>
+
+        <div id="div_main_area">
+            <!-- Chess Board Area -->
+            <div class="window" style="width: 1400px;height: 900px">
+                <div class="title-bar">
+                    <div class="title-bar-text">Chess Battler</div>
+                    <div class="title-bar-controls">
+                        <button aria-label="Minimize"></button>
+                        <button aria-label="Maximize"></button>
+                        <button aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <div class="wrapper">
+                        <canvas id="game_canvas" width="700" height="700">Canvas unsupported on your browser</canvas>
+                        <canvas id="ui_canvas"   width="700" height="700">Canvas unsupported on your browser</canvas>
+                    </div> <!-- End of wrapper -->
+
+                    <!-- Chess Board Settings Area -->
+                    <article>
+                        <div class="chess_settings_area" id="div_debug_area">
+
+                            <h4>Player's Turn</h4>
+                            <label  id="label_player_turn">Waiting for the game to start</label>
+                            <button id="button_start_game" class="button button_round full_width" onclick="html_button_startGame()">Start Game</button>
+
+                            <h2>Settings</h2>
+
+                            <!-- Checkbox Area -->
+
+                            <!-- Chess AI Rules Area -->
+                            <div id="div_chess_ai1_rules">
+
+                                <table id="table_chess_ai1_rules">
+                                    <tr>
+                                        <th>Player 1 CPU</th>
+                                        <th>Rules</th>
+                                        <th>Add Rule</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" id="checkbox_player1" onchange="html_ComputerPlayerCheckbox(event)" name="player1" value="CPU">
+                                        </td>
+                                        <td>
+                                            <select id="select_ai1_rule">
+                                                <option selected disabled>Select CPU rule</option>
+                                            </select>
+                                            <ul id="ul_ai_1_priority_list" style="display: none;" class="moveable">
+                                                <li>One</li>
+                                                <li>Two</li>
+                                                <li>Three</li>
+                                                <li>Four</li>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button id="button_ai1_add_rule" class="button_round">+</button>
+                                        </td>
+                                    </tr>
+                                </table> <!-- End of table_chess_ai1_rules -->
+
+                            </div> <!-- End of div_chess_ai1_rules -->
+
+                            <div id="div_chess_ai2_rules">
+
+                                <table id="table_chess_ai2_rules">
+                                    <tr>
+                                        <th>Player 2 CPU</th>
+                                        <th>Rules</th>
+                                        <th>Add Rule</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" id="checkbox_player2" style="border: 2px solid red" onchange="html_ComputerPlayerCheckbox(event)" name="player2" value="CPU">
+                                        </td>
+                                        <td>
+                                            <select id="select_ai2_rule">
+                                                <option selected disabled>Select CPU rule</option>
+                                            </select>
+                                            <ul id="ul_ai_2_priority_list" style="display: none;" class="moveable">
+                                                <li>One</li>
+                                                <li>Two</li>
+                                                <li>Three</li>
+                                                <li>Four</li>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button id="button_ai2_add_rule" class="button_round">+</button>
+                                        </td>
+                                    </tr>
+                                </table> <!-- End of table_chess_ai1_rules -->
+
+                            </div> <!-- End of div_chess_ai1_rules -->
+
+                            <!-- Debug Settings, hidden unless you need to see debug info-->
+                            <textarea id="debug_textarea_selectedpiece" style="display: none;"></textarea>
+                            <textarea id="debug_textarea_mousepos"      style="display: none;"></textarea>
+
+                        </div> <!-- End of chess_setings_area-->
+
+                    </article>
+
+                </div> <!-- End of <div class="window-body"> -->
+
+            </div> <!-- End of <div class="window"> -->
+
+        </div> <!-- End of div_main_area -->
+
+    </body>
+
+</html>
