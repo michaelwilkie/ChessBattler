@@ -259,10 +259,21 @@ class Chess
         if (0 == game_chessboard_instance.oKing_in_check.getSafeMoves().length)
         {
             // Determine if the aggressor cannot be captured
-        }
+            if (!game_chessboard_instance.oPiece_checking_king.canBeTaken())
+            {
+                // Determine if the aggressor cannot be blocked
+                if (!game_chessboard_instance.oPiece_checking_king.canBeBlockedFrom(game_chessboard_instance.oKing_in_check))
+                {
+                    bReturn = true;
+                } // End of if (!game_chessboard_instance.oPiece_checking_king.canBeBlockedFrom(game_chessboard_instance.oKing_in_check))
+                    
+            } // End of if (!game_chessboard_instance.oPiece_checking_king.canBeTaken())
+                
+        } // End of if (0 == game_chessboard_instance.oKing_in_check.getSafeMoves().length)
+
 
         return bReturn;
-    }
+    } // End of Chess.isCheckMated()
 
     stateWhiteTurn__Entry()
     {

@@ -732,14 +732,17 @@ class ChessPiece
         if (this.getColor() == GAME_CHESSPIECE__COLOR__BLACK) { enemy_pieces_list = game_chessboard_instance.getWhitePieces(); }
         else                                                  { enemy_pieces_list = game_chessboard_instance.getBlackPieces(); }
 
+        // Go through all of this player's moves
         for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
         {
             var oMovePosition = this.valid_moves_list[iMoveIndex];
 
+            // Go through all the enemies
             for (var iEnemyPieceIndex = 0; iEnemyPieceIndex < enemy_pieces_list.length; iEnemyPieceIndex++)
             {
                 var oEnemyPiece = enemy_pieces_list[iEnemyPieceIndex];
 
+                // Go through all an enemy's moves
                 for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemyPiece.valid_moves_list.length; iEnemyMoveIndex++)
                 {
                     var oEnemyMovePosition = oEnemyPiece.valid_moves_list[iEnemyMoveIndex];
@@ -775,7 +778,285 @@ class ChessPiece
         return safe_moves_list;
 
     } // End of ChessPiece.getSafeMoves()
+    
+    //////////////////////////////////////////////////////////////
+    // ChessPiece.canBeTaken                                    //
+    // Function:                                                //
+    //      Determines whether a piece can be taken by an enemy //
+    // Parameters:                                              //
+    //      None                                                //
+    // Return value:                                            //
+    //      true    = This piece can be taken by the enemy      //
+    //      false   = This piece cannot be taken by the enemy   //
+    //////////////////////////////////////////////////////////////
+    canBeTaken()
+    {
+        // Null checking
+        if (null == game_chessboard_instance) { throw "Error: Chessboard instance is null"                  ; }
+        if (null == this.valid_moves_list   ) { throw "Error: Valid moves list is null, rather than empty"  ; }
+        
+        var enemy_pieces_list = null;
+        
+        // Determine what team this piece is on then get the pieces of the enemy team
+        if (this.getColor() == GAME_CHESSPIECE__COLOR__BLACK) { enemy_pieces_list = game_chessboard_instance.getWhitePieces(); }
+        else                                                  { enemy_pieces_list = game_chessboard_instance.getBlackPieces(); }
 
+        // Go through all of this player's moves
+        for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+        {
+            var oMovePosition = this.valid_moves_list[iMoveIndex];
+
+            // Go through all the enemies
+            for (var iEnemyPieceIndex = 0; iEnemyPieceIndex < enemy_pieces_list.length; iEnemyPieceIndex++)
+            {
+                var oEnemyPiece = enemy_pieces_list[iEnemyPieceIndex];
+
+                // Go through all an enemy's moves
+                for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemyPiece.valid_moves_list.length; iEnemyMoveIndex++)
+                {
+                    var oEnemyMovePosition = oEnemyPiece.valid_moves_list[iEnemyMoveIndex];
+
+                    // Determine if the current piece and the enemy want to move to the same location
+                    if (game_vectorsEqual2D(oMovePosition, oEnemyMovePosition))
+                    {
+                        // This piece can be taken by the enemy
+                        return true;
+                    } // End of if (game_vectorsEqual2D(oMovePosition, oEnemyMovePosition))
+
+                } // End of for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemyPiece.valid_moves_list.length; iEnemyMoveIndex++)
+
+            } // End of for (var iEnemyPieceIndex = 0; iEnemyPieceIndex < enemy_pieces_list.length; iEnemyPieceIndex++)
+
+        } // End of for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+        
+        // This piece cannot be taken by the enemy
+        return false;
+
+    } // End of ChessPiece.canBeTaken()
+    
+    //////////////////////////////////////////////////////////////////////////////
+    // ChessPiece.canBeBlockedFrom                                              //
+    // Function:                                                                //
+    //      Determines whether a sliding chess piece (rook, queen, bishop)      //
+    //      can be blocked by another piece                                     //
+    // Parameters:                                                              //
+    //      oPiece [IN] = [ChessPiece] The piece this can take                  //
+    // Return value:                                                            //
+    //      true    = The current chess piece can be blocked from its victim    //
+    //      false   = The current chess piece cannot be blocked from its victim //
+    //////////////////////////////////////////////////////////////////////////////
+    canBeBlockedFrom(oPiece)
+    {
+        var bReturn = false;
+
+        if (null == oPiece) { throw "Error: Trying to check if a null piece can be blocked"; }
+        
+        switch (this.getType())
+        {
+            // These pieces can be blocked because how far they slide across the board
+            // is determined by what might be in the way
+            case GAME_CHESSPIECE__TYPE__ROOK    :
+            case GAME_CHESSPIECE__TYPE__BISHOP  :
+            case GAME_CHESSPIECE__TYPE__QUEEN   :
+            {
+                // Get all the moves these pieces can go when going towards oPiece
+                moves_between_piece_list = this.getValidMovesBetweenTarget(oPiece, this.getTargetGradient(oPiece));
+                
+                // Determine if an enemy can occupy any of these spaces on their turn
+                if (this.enemiesCanOccupySpaces(moves_between_piece_list))
+                {
+                    bReturn = true;
+                }
+                
+                break;
+            }
+            
+            // These pieces cannot be blocked as they only make a singular move to and from their origin/destination
+            case GAME_CHESSPIECE__TYPE__PAWN    :
+            case GAME_CHESSPIECE__TYPE__KNIGHT  :
+            case GAME_CHESSPIECE__TYPE__KING    :
+            default:
+            {
+                bReturn = false;
+
+                break;
+            }
+        } // End of switch (this.getType())
+        
+        return bReturn;
+    } // End of ChessPiece.canBeBlockedFrom()
+    
+    //////////////////////////////////////////////////////////////
+    // ChessPiece.enemiesCanOccupySpaces                        //
+    // Function:                                                //
+    //      There are two lists of valid moves                  //
+    //      List 1: valid_moves_list of the current Chess Piece //
+    //      List 2: enemy.valid_moves_list of enemy pieces      //
+    //          If the position of either of these lists match, //
+    //          then this space is blockable, returning true    //
+    // Parameters:                                              //
+    //      blockable_spaces_list                               //
+    // Return value:                                            //
+    //      true    = Enemies can   block this piece            //
+    //      false   = Enemies can't block this piece            //
+    //////////////////////////////////////////////////////////////
+    enemiesCanOccupySpaces(blockable_spaces_list)
+    {
+        // Null checking
+        if (null == blockable_spaces_list) { throw "Error: The blockable spaces list is empty"; }
+        
+        var enemies_list = null;
+        
+        // Determine what team this piece is on, then assign the enemies_list to the opposite
+        if (GAME_CHESSPIECE__COLOR__BLACK == this.getColor())
+        {
+            enemies_list = game_chessboard_instance.getWhitePieces();
+        }
+        else
+        {
+            enemies_list = game_chessboard_instance.getBlackPieces();
+        }
+        
+        // Go through the blockable space slist
+        for (var iMoveIndex = 0; iMoveIndex < blockable_spaces_list.length; iMoveIndex++)
+        {
+            var oBlockableSpace = blockable_spaces_list[iMoveIndex];
+            
+            // Go through the list of enemies
+            for (var iEnemyIndex = 0; iEnemyIndex < enemies_list.length; iEnemyIndex++)
+            {
+                var oEnemy = enemies_list[iEnemyIndex];
+                
+                // Go through the enemy's list of moves
+                for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemy.valid_moves_list.length; iEnemyMoveIndex++)
+                {
+                    var oPossibleEnemyDestination = oEnemy.valid_moves_list[iEnemyMoveIndex];
+                    
+                    // Determine if the enemy could possibly land in this blockable space
+                    if (game_vectorsEqual2D(oBlockableSpace, oPossibleEnemyDestination))
+                    {
+                        return true;
+                    }
+                        
+                } // End of for (var iEnemyMoveIndex = 0; iEnemyMoveIndex < oEnemy.valid_moves_list.length; iEnemyMoveIndex++)
+
+            } // End of for (var iEnemyIndex = 0; iEnemyIndex < enemies_list.length; iEnemyIndex++)
+
+        } // End of for (var iMoveIndex 0; iMoveIndex < blockable_spaces_list.length; iMoveIndex++)
+    
+        return false;
+    
+    } // End of ChessPiece.enemiesCanOccupySpaces
+    
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // ChessPiece.canTarget                                                                 //
+    // Function:                                                                            //
+    //      Determines whether the current piece (this) can target another in particular    //
+    // Parameters:                                                                          //
+    //      oPiece [IN] = [ChessPiece] The piece in question to check for targetability     //
+    // Return value:                                                                        //
+    //      true    = oPiece can be targeted by the current one                             //
+    //      false   = oPiece cannot be targeted by the current one                          //
+    //////////////////////////////////////////////////////////////////////////////////////////
+    canTarget(oPiece)
+    {
+        // Null checking
+        if (null == oPiece)                         { throw "Error: Trying to target a null piece"                          ; }
+        if (null == this.valid_moves_list)          { throw "Error: Trying to target a piece with a null valid moves list"  ; }
+        if (this.getColor() == oPiece.getColor())   { throw "Error: Trying to target ally piece"                            ; }
+        
+        // Go through all of this player's moves
+        for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+        {
+            var oMovePosition = this.valid_moves_list[iMoveIndex];
+            
+            // Determine if a valid destination is the same location as an enemy piece
+            if (game_vectorsEqual2D(oMovePosition, oPiece.getPosition()))
+            {
+                // This piece can be taken by the enemy
+                return true;
+            }
+            
+        } // End of for (var iMoveIndex = 0; iMoveIndex < this.valid_moves_list.length; iMoveIndex++)
+        
+        return false;
+    } // End of ChessPiece.canTarget()
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // ChessPiece.getTargetPieceGradient                                                        //
+    // Function:                                                                                //
+    //      Gets the initial direction of the current piece (this) and the target piece         //
+    //                                                                                          //
+    //      C - - - +       C {x,y}                                                             //
+    //      | \     |       T {x,y}                                                             //
+    //      |   \   |       If C.x - T.x > 0 then gradient =  1                                 //
+    //      |     \ |       If C.x - T.x < 0 then gradient = -1                                 //
+    //      + - - - T       If C.x - T.x = 0 then gradient =  0                                 //
+    //                      If C.y - T.y > 0 then gradient =  1                                 //
+    //                      If C.y - T.y < 0 then gradient = -1                                 //
+    //                      If C.y - T.y = 0 then gradient =  0                                 //
+    //                                                                                          //
+    // Parameters:                                                                              //
+    //      oTargetPiece [IN] = [ChessPiece] The target that the current piece wants to follow  //
+    // Return value:                                                                            //
+    //      Object {x, y} = The direction where the magnitude of x or y will be between -1 or 1 //
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    getTargetPieceGradient(oTargetPiece)
+    {
+        var target_gradient = null;
+        if (!this.canTarget(oTargetPiece)) { return target_gradient; }
+        
+        var current_piece_position  = this.getPosition();
+        var target_piece_position   = oTargetPiece.getPosition();
+        
+        var x_difference = current_piece_position.x - target_piece_position.x;
+        var y_difference = current_piece_position.y - targeT_piece_position.y;
+        
+        var x_gradient = 0;
+        var y_gradient = 0;
+        
+        if      (x_difference < 0)  { x_gradient = -1; }
+        else if (x_difference > 0)  { x_gradient =  1; }
+        else                        { x_gradient =  0; }
+        
+        if      (y_difference < 0)  { y_gradient = -1; }
+        else if (y_difference > 0)  { y_gradient =  1; }
+        else                        { y_gradient =  0; }
+        
+        if (0 == x_gradient
+         && 0 == y_gradient)
+        {
+            throw "Error: Both x and y gradient are 0, that shouldn't be possible";
+        }
+        
+        return {x: x_gradient, y: y_gradient};
+    } // End of ChessPiece.getTargetPieceGradient()
+    
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // ChessPiece.getValidMovesBetweenTarget                                                //
+    // Function:                                                                            //
+    //      Returns a list of valid moves a piece can make between itself and its target    //
+    // Parameters:                                                                          //
+    //      oTarget     [IN] = [ChessPiece  ] The target to check if we have movable space  //
+    //      oGradient   [IN] = [Object {x,y}] The direction we will look for movable space  //
+    // Return value:                                                                        //
+    //      Array<{x,y}> = List of valid spaces between this current piece and its target   //
+    //////////////////////////////////////////////////////////////////////////////////////////
+    getValidMovesBetweenTarget(oTarget, oGradient)
+    {
+        var valid_moves_to_target_list = [];
+
+        // Null checking
+        if (null == oTarget                     ) { throw "Error: Target is null"                                       ; }
+        if (null == oGradient                   ) { throw "Error: Targeting with a null gradient"                       ; }
+        if (null == this.valid_moves_list.length) { throw "Error: Trying to target a piece with a null valid moves list"; }
+        
+        this.addSpaceIfValid_Multiple(valid_moves_to_target_list, oGradient.x, oGradient.y);
+        
+        return valid_moves_to_target_list;
+        
+    } // End of ChessPiece.getValidMovesBetweenTarget(oTarget, oGradient)
+    
     /////////////////////////////////////////////////////////////
     //     ChessPiece.addSpaceIfValid_Single(valid_moves_list) //
     // Function:                                               //
