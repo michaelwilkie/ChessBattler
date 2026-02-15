@@ -13,16 +13,20 @@ const GAME_CPU__STATE__INITIALIZE       = 0;
 const GAME_CPU__STATE__WAITING_FOR_TURN = 1;
 const GAME_CPU__STATE__MY_TURN          = 2;
 
+const GAME_CPU__WAIT_TIME               = TIME_1_SECOND; // [Number] Time in seconds that a CPU will wait so the player can see the CPU "thinking" before making a move
+
 var GAME_CPU__TASK_LIST = [];
 
 class ChessCPU
 {
     constructor(oPlayer)
     {
-        this.iState           = GAME_CPU__STATE__INITIALIZE; // [Number] Tracks the state of the CPU
-        this.rules_list       = []                         ; // [Array ] List of rules governing this CPU
-        this.oPlayer          = oPlayer                    ; // [Player object] Reference to the player class object that will be interfacing with the game's state machine
-        this.delay_timeout_id = null                       ; // [Number] Reference to the setTimeout function this will be used to cause a delay
+        this.iState                 = GAME_CPU__STATE__INITIALIZE   ; // [Number] Tracks the state of the CPU
+        this.rules_list             = []                            ; // [Array ] List of rules governing this CPU
+        this.oPlayer                = oPlayer                       ; // [Player object] Reference to the player class object that will be interfacing with the game's state machine
+        this.delay_timeout_id       = null                          ; // [Number] Reference to the setTimeout function this will be used to cause a delay
+        this.cpu_delay_timer        = 0                             ; // [Number] Timer for the CPU "think" time, see GAME_CPU__WAIT_TIME
+        this.cpu_delay_timer_flag   = 0                             ; // [Number] Flag signalling whether the cpu_delay_timer has started
     } // End of constructor()
 
     ///////////////////////////////////////////
@@ -135,20 +139,51 @@ class ChessCPU
         
     } // End of ChessCPU.stateWaitingForTurn
 
-    ////////////////////////////////
-    // ChessCPU.stateMyTurn       //
-    // Function:                  //
-    //     Handles the CPU's turn //
-    // Return value:              //
-    //     None                   //
-    ////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    // ChessCPU.stateMyTurn                                                 //
+    // Function:                                                            //
+    //      Handles the CPU's turn                                          //
+    //      Have the computer wait a predetermined amount time              //
+    //         to give the player time to react to where the CPU moves next //
+    // Return value:                                                        //
+    //     None                                                             //
+    //////////////////////////////////////////////////////////////////////////
     stateMyTurn()
     {
-        // Make my move
-        this.move();
+        // Determine if the timer has NOT started
+        if (0 == this.cpu_delay_timer_flag)
+        {
+            // The timer has NOT started
 
-        // Start waiting for my next turn
-        this.iState = GAME_CPU__STATE__WAITING_FOR_TURN;
+            // Set the timer delay flag so that we do not reenter this conditional while the timer has started
+            this.cpu_delay_timer_flag = 1;
+
+            // Start the timer by capturing the current time
+            this.cpu_delay_timer = game_core.time.getCurrentTime();
+
+        } // if (0 == this.cpu_delay_timer_flag)
+        else
+        {
+            // The timer has started
+
+            // Determine if it has expired
+            if (game_core.time.hasExpired(this.cpu_delay_timer + GAME_CPU__WAIT_TIME))
+            {
+                // Timer has expired
+
+                // Reset the delay timer flag
+                this.cpu_delay_timer_flag = 0;
+
+                // Make my move
+                this.move();
+
+                // Start waiting for my next turn
+                this.iState = GAME_CPU__STATE__WAITING_FOR_TURN;
+
+            } // End of if (game_core.time.hasExpired(this.cpu_delay_timer + GAME_CPU__WAIT_TIME))
+
+        } // End of else (of if (0 == this.cpu_delay_timer_flag))
+
     } // End of ChessCPU.stateMyTurn
     
     //////////////////////////////////////////////////////////////////////////////////////
@@ -160,23 +195,8 @@ class ChessCPU
     //////////////////////////////////////////////////////////////////////////////////////
     move()
     {
-        if (this.delay_timeout_id == null)
-        {
-            // Grabbing a reference to the CPU object before going into the timeout function
-            var this_object = this;
-            
-            // Delay the move briefly to show a "human" reaction time
-            this.delay_timeout_id = setTimeout(function()
-            {
-                var random_move = this_object.getRandomMove();
-                this_object.oPlayer.move(random_move.piece, random_move.location);
-
-                // Reset the reference to the timeout to null
-                this_object.delay_timeout_id = null;
-                
-            }, TIME_1_SECOND);
-        } // End of if (this.delay_timeout_id == null)
-        
+        var random_move = this.getRandomMove();
+        this.oPlayer.move(random_move.piece, random_move.location);   
     } // End of ChessCPU.move
     
     ////////////////////////////////////////////////////

@@ -24,6 +24,69 @@ class GameTime
         this.delta  = (this.now - this.then) / 1000; // [seconds] time since last frame
         this.then   = this.now;
     }
+
+    ///////////////////////////////
+    // GameTime.getCurrentTime   //
+    // Function:                 //
+    //     Gets the current time //
+    // Return value:             //
+    //     TimeStamp             //
+    ///////////////////////////////
+    getCurrentTime()
+    {
+        return this.now;
+    }
+
+    ////////////////////////////////////
+    // GameTime.getCurrentTimeSeconds //
+    // Function:                      //
+    //     Gets the current time      //
+    // Return value:                  //
+    //     TimeStamp                  //
+    ////////////////////////////////////
+    getCurrentTimeSeconds()
+    {
+        return this.now / 1000;
+    }
+
+    ////////////////////////////////////////////////////////////
+    // GameTime.getFutureTimeSeconds                          //
+    // Function:                                              //
+    //     Gets the time a certain number of seconds from now //
+    // Return value:                                          //
+    //     TimeStamp                                          //
+    ////////////////////////////////////////////////////////////
+    getFutureTimeSeconds(time_seconds)
+    {
+        // this.now contains time in milliseconds
+        return this.now + (time_seconds * 1000);
+    }
+
+    ///////////////////////////////////////////////////////////////
+    // GameTime.hasExpired                                       //
+    // Function:                                                 //
+    //     Returns true if the this.now has passed up time_stamp //
+    //     or in this case, is a negative difference             //
+    // Return value:                                             //
+    //     Boolean                                               //
+    ///////////////////////////////////////////////////////////////
+    hasExpired(time_stamp)
+    {
+        return (this.now - time_stamp) > 0;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    // GameTime.timeElapsedSince                                                     //
+    // Function:                                                                     //
+    //     Returns the difference between the current time and the variable provided //
+    // Return value:                                                                 //
+    //     TimeStamp                                                                 //
+    ///////////////////////////////////////////////////////////////////////////////////
+    timeElapsedSince(time_val)
+    {
+        return this.now - time_val;
+    }
+
     timeToUpdate()
     {
         if (this.now > this.last_frame_update + this.update_frame_timer)
