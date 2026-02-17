@@ -17,10 +17,10 @@ class Player
 {
     constructor(iColor, iType)
     {
-        this.iColor       = iColor; // [Integer] Color representing what team this player is on
-        this.bMoved       = false;  // [Boolean] Determines if this player has made a move
-        this.iType        = iType;  // [Integer] Type representing the type of player controlling this object (see GAME_PLAYER__TYPE)
-        this.oCPU         = null;   // [ChessCPU object] Object controlling the player
+        this.iColor       = iColor  ; // [Integer] Color representing what team this player is on
+        this.bMoved       = false   ; // [Boolean] Determines if this player has made a move
+        this.iType        = iType   ; // [Integer] Type representing the type of player controlling this object (see GAME_PLAYER__TYPE)
+        this.oCPU         = null    ; // [ChessCPU object] Object controlling the player
         if (GAME_PLAYER__TYPE__COMPUTER == iType)
         {
             this.oCPU = new ChessCPU(this);

@@ -349,7 +349,7 @@ class ChessBoard
         var victim_pos = victim.getPosition();
 
         // In case a pawn finds a piece
-        this.bPiece_has_moved_once = true;
+        killer.bPiece_has_moved_once = true;
 
         // Kill the victim
         this.oChess_board[victim_pos.x][victim_pos.y].clearSpace();
@@ -370,12 +370,12 @@ class ChessBoard
     swapPieces(piece1, piece2)
     {
         // For pawns
-        piece1.bPiece_has_moved_once = true;
-
         var piece1_pos = piece1.getPosition();
         var piece2_pos = piece2.getPosition();
 
         var temp_piece = new ChessPiece(piece1.getMask(), piece1_pos);
+        temp_piece.bPiece_has_moved_once    = true;
+        piece2.bPiece_has_moved_once        = true;
 
         this.oChess_board[piece1_pos.x][piece1_pos.y].setProperties(piece2.getType()    , piece2.getColor()    );
         this.oChess_board[piece2_pos.x][piece2_pos.y].setProperties(temp_piece.getType(), temp_piece.getColor());

@@ -72,6 +72,7 @@ class Chess
 
                 break;
             }
+
         } // End of switch (this.iState)
 
         // Determine if this player is a computer
@@ -86,6 +87,7 @@ class Chess
             this.oPlayer_Black.runCPU();
         }
 
+        // Determine if the state has changed
         if (this.iState != this.iStatePrevious)
         {
             html_label_setPlayerTurn(this.iState);
@@ -126,7 +128,7 @@ class Chess
         {
             switch(this.whichKingInCheck())
             {
-                case GAME_CHESSPIECE__COLOR__NONE : { /* No king is in check */        break; }
+                case GAME_CHESSPIECE__COLOR__NONE : { this.stateBlackTurn__Entry()   ; break; }
                 case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
                 case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
 
@@ -135,9 +137,9 @@ class Chess
                     console.log("Invalid king in check");
                     break;
                 }
-            }
 
-            this.stateBlackTurn__Entry();
+            } // End of switch(this.whichKingInCheck())
+
         } // End of if (this.oPlayer_White.hasMoved())
 
     } // End of stateWhiteTurn()
@@ -155,7 +157,7 @@ class Chess
         {
             switch(this.whichKingInCheck())
             {
-                case GAME_CHESSPIECE__COLOR__NONE : { /* No king is in check */        break; }
+                case GAME_CHESSPIECE__COLOR__NONE : { this.stateWhiteTurn__Entry()   ; break; }
                 case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
                 case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
 
@@ -164,9 +166,9 @@ class Chess
                     console.log("Invalid king in check");
                     break;
                 }
-            }
 
-            this.stateWhiteTurn__Entry();
+            } // End of switch(this.whichKingInCheck())
+
         } // End of if (this.oPlayer_Black.hasMoved())
 
     } // End of stateBlackTurn()
@@ -184,24 +186,27 @@ class Chess
         {
             this.stateBlackCheckMate__Entry();
         }
-
-        if (this.oPlayer_Black.hasMoved())
+        else
         {
-            switch(this.whichKingInCheck())
+            if (this.oPlayer_Black.hasMoved())
             {
-                case GAME_CHESSPIECE__COLOR__NONE : { /* No king is in check */        break; }
-                case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
-                case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
-
-                default:
+                switch(this.whichKingInCheck())
                 {
-                    console.log("Invalid king in check");
-                    break;
-                }
-            }
+                    case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
+                    case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
 
-        } // End of if (this.oPlayer_Black.hasMoved())
+                    case GAME_CHESSPIECE__COLOR__NONE:
+                    default:
+                    {
+                        console.log("Invalid king in check");
+                        break;
+                    }
+                } // End of switch(this.whichKingInCheck())
 
+            } // End of if (this.oPlayer_Black.hasMoved())
+                
+        } // End of else (of if (this.isCheckMated())
+    
     } // End of Chess.stateBlackKingInCheck()
 
     /////////////////////////////////////////
@@ -213,22 +218,30 @@ class Chess
     /////////////////////////////////////////
     stateWhiteKingInCheck()
     {
-        if (this.oPlayer_White.hasMoved())
+        if (this.isCheckMated())
         {
-            switch(this.whichKingInCheck())
+            this.stateWhiteCheckMate__Entry();
+        }
+        else
+        {
+            if (this.oPlayer_White.hasMoved())
             {
-                case GAME_CHESSPIECE__COLOR__NONE : { /* No king is in check */        break; }
-                case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
-                case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
-
-                default:
+                switch(this.whichKingInCheck())
                 {
-                    console.log("Invalid king in check");
-                    break;
-                }
-            }
+                    case GAME_CHESSPIECE__COLOR__BLACK: { this.stateBlackInCheck__Entry(); break; }
+                    case GAME_CHESSPIECE__COLOR__WHITE: { this.stateWhiteInCheck__Entry(); break; }
 
-        } // End of if (this.oPlayer_White.hasMoved())
+                    case GAME_CHESSPIECE__COLOR__NONE:
+                    default:
+                    {
+                        console.log("Invalid king in check");
+                        break;
+                    }
+                } // End of switch(this.whichKingInCheck())
+
+            } // End of if (this.oPlayer_White.hasMoved())
+
+        } // End of else (of if (this.isCheckMated()))
 
     } // End of stateWhiteKingInCheck()
 
